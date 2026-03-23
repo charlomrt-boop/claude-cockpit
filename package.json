@@ -14,5 +14,11 @@
     "bun-types": "latest",
     "typescript": "^5.7.0"
   },
+  "files": [
+    "dist/",
+    "src/",
+    "commands/",
+    ".claude-plugin/"
+  ],
   "license": "MIT"
 }

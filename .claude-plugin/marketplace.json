@@ -1,0 +1,20 @@
+{
+  "name": "claude-cockpit",
+  "owner": {
+    "name": "CharlCharg",
+    "email": "charlomrt@gmail.com"
+  },
+  "metadata": {
+    "description": "Starship-style statusline HUD for Claude Code - context, cost tracking, usage, activity, todos",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-cockpit",
+      "source": "./",
+      "description": "Starship-style statusline with context bar, cost tracking, rate limits, tool activity, agent tracking, and todo progress. Pipe-separated colored text, zero runtime deps.",
+      "category": "monitoring",
+      "tags": ["hud", "statusline", "cockpit", "monitoring", "context", "cost", "tools", "agents", "todos"]
+    }
+  ]
+}

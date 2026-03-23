@@ -1,0 +1,16 @@
+{
+  "name": "claude-cockpit",
+  "description": "Starship-style statusline HUD for Claude Code - context, cost tracking, usage, activity, todos",
+  "version": "0.1.0",
+  "author": {
+    "name": "CharlCharg",
+    "url": "https://github.com/charlomrt-boop"
+  },
+  "commands": [
+    "./commands/configure.md"
+  ],
+  "homepage": "https://github.com/charlomrt-boop/claude-cockpit",
+  "repository": "https://github.com/charlomrt-boop/claude-cockpit",
+  "license": "MIT",
+  "keywords": ["hud", "statusline", "cockpit", "context", "cost", "tools", "agents", "todos"]
+}
