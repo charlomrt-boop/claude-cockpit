@@ -116,8 +116,8 @@ export function parseTranscriptLines(lines: string[]): TranscriptData {
             status: "pending",
           });
         } else if (block.name === "TaskUpdate") {
-          const input = block.input as { id?: string; status?: string };
-          const targetId = String(input.id ?? "");
+          const input = block.input as { id?: string; taskId?: string; status?: string };
+          const targetId = String(input.taskId ?? input.id ?? "");
           const newStatus = normalizeTodoStatus(input.status);
           const existing = todos.find((t) => t.id === targetId);
           if (existing) existing.status = newStatus;
