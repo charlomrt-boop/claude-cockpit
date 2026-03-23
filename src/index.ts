@@ -24,7 +24,11 @@ export function buildHud(
   if (stdin === null) return "";
 
   const tier = getModelTier(stdin.model.id);
-  const label = getModelLabel(stdin.model.display_name, stdin.model.id);
+  // Use full display name like "[Opus 4.6 (1M context)]" for clarity
+  const shortLabel = getModelLabel(stdin.model.display_name, stdin.model.id);
+  const label = stdin.model.display_name
+    ? `[${stdin.model.display_name}]`
+    : `[${shortLabel}]`;
   const contextPct = Math.round(getContextPercent(stdin));
 
   // ── Line 1 ──────────────────────────────────────────────────────────────────

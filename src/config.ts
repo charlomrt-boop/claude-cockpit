@@ -9,7 +9,7 @@ import { COLORS } from "./colors";
 export const DEFAULT_CONFIG: CockpitConfig = {
   theme: "default",
   layout: "expanded",
-  powerlineGlyphs: true,
+  powerlineGlyphs: false,
   segments: {
     usage: { enabled: true, showSevenDay: "auto" },
     cost: { enabled: true },

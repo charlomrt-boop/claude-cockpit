@@ -1,12 +1,13 @@
 import type { Segment } from "./types";
 import { fg, bg, reset, POWERLINE_RIGHT, POWERLINE_RIGHT_ASCII } from "./colors";
 
-export function renderLine(segments: Segment[], powerline: boolean): string {
+/**
+ * Render segments with colored backgrounds + powerline arrows.
+ */
+export function renderLinePowerline(segments: Segment[]): string {
   if (segments.length === 0) return "";
 
-  const arrow = powerline ? POWERLINE_RIGHT : POWERLINE_RIGHT_ASCII;
   let out = "";
-
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i];
     const content = seg.icon ? `${seg.icon} ${seg.text}` : seg.text;
@@ -15,13 +16,41 @@ export function renderLine(segments: Segment[], powerline: boolean): string {
 
     if (i < segments.length - 1) {
       const nextBg = segments[i + 1].bg;
-      out += `${fg(seg.bg)}${bg(nextBg)}${arrow}`;
+      out += `${fg(seg.bg)}${bg(nextBg)}${POWERLINE_RIGHT}`;
     } else {
-      out += `${reset()}${fg(seg.bg)}${arrow}${reset()}`;
+      out += `${reset()}${fg(seg.bg)}${POWERLINE_RIGHT}${reset()}`;
     }
   }
-
   return out;
+}
+
+/**
+ * Render segments as colored text on transparent bg, separated by dim pipes.
+ * This matches the claude-hud style the user prefers.
+ */
+export function renderLinePipes(segments: Segment[]): string {
+  if (segments.length === 0) return "";
+
+  const DIM_PIPE = `${fg(240)} | ${reset()}`;
+  const parts: string[] = [];
+
+  for (const seg of segments) {
+    const content = seg.icon ? `${seg.icon} ${seg.text}` : seg.text;
+    // Use the segment bg color as the TEXT color (no background fill)
+    parts.push(`${fg(seg.bg)}${content}${reset()}`);
+  }
+
+  return parts.join(DIM_PIPE);
+}
+
+/**
+ * Unified render entry point.
+ */
+export function renderLine(segments: Segment[], powerline: boolean): string {
+  if (powerline) {
+    return renderLinePowerline(segments);
+  }
+  return renderLinePipes(segments);
 }
 
 export function renderHud(

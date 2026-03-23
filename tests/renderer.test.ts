@@ -14,13 +14,15 @@ test("renderLine with powerline joins segments with arrows", () => {
   expect(output).toContain("\uE0B0");
 });
 
-test("renderLine with ASCII fallback uses >", () => {
+test("renderLine with pipe mode uses | separator", () => {
   const segments: Segment[] = [
     { text: "Opus", fg: COLORS.white, bg: COLORS.blue },
     { text: "42%", fg: COLORS.white, bg: COLORS.green },
   ];
   const output = renderLine(segments, false);
-  expect(output).toContain(">");
+  expect(output).toContain("|");
+  expect(output).toContain("Opus");
+  expect(output).toContain("42%");
   expect(output).not.toContain("\uE0B0");
 });
 

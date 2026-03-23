@@ -27,7 +27,7 @@ test("loadConfigFromString ignores invalid types", () => {
     powerlineGlyphs: "yes",
   }));
   expect(config.layout).toBe("expanded");
-  expect(config.powerlineGlyphs).toBe(true);
+  expect(config.powerlineGlyphs).toBe(false); // default is false (pipe mode)
 });
 
 test("DEFAULT_CONFIG has correct cost prices for opus", () => {
