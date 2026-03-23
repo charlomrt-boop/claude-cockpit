@@ -49,7 +49,7 @@ const mockNow = Date.now();
 
 describe("buildHud", () => {
   test("returns non-empty output with full mock data", () => {
-    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
     expect(result.length).toBeGreaterThan(0);
     expect(result).toContain("Opus 4.6");
     expect(result).toContain("42%");
@@ -57,7 +57,7 @@ describe("buildHud", () => {
   });
 
   test("returns empty string when stdin is null", () => {
-    const result = buildHud(null, mockTranscript, DEFAULT_CONFIG, mockNow);
+    const result = buildHud(null, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
     expect(result).toBe("");
   });
 
@@ -69,7 +69,7 @@ describe("buildHud", () => {
         cost: { enabled: false },
       },
     };
-    const result = buildHud(mockStdin, mockTranscript, configNoCost, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, configNoCost, mockNow, 120);
     expect(result).not.toContain("~$");
     // model and context are always present
     expect(result).toContain("Opus 4.6");
@@ -77,11 +77,12 @@ describe("buildHud", () => {
   });
 
   test("includes activity line with tools and todos", () => {
-    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
     // activity segment shows last tool name
     expect(result).toContain("Read");
-    // todos segment shows completed/total
-    expect(result).toContain("1/2");
+    // breadcrumb segment shows step progression
+    expect(result).toContain("●");
+    expect(result).toContain("○");
   });
 
   test("output does not contain cost when all line2 segments are disabled", () => {
@@ -94,10 +95,11 @@ describe("buildHud", () => {
         todos: { enabled: false },
       },
     };
-    const result = buildHud(mockStdin, mockTranscript, configLine2Off, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, configLine2Off, mockNow, 120);
     expect(result).toContain("Opus 4.6");
-    // no todos shown
-    expect(result).not.toContain("1/2");
+    // no breadcrumb shown
+    expect(result).not.toContain("●");
+    expect(result).not.toContain("○");
   });
 
   test("compact layout puts everything on one line (no newline)", () => {
@@ -105,12 +107,12 @@ describe("buildHud", () => {
       ...DEFAULT_CONFIG,
       layout: "compact",
     };
-    const result = buildHud(mockStdin, mockTranscript, compactConfig, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, compactConfig, mockNow, 120);
     expect(result).not.toContain("\n");
   });
 
   test("expanded layout may contain a newline when line2 has segments", () => {
-    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow);
+    const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
     expect(result).toContain("\n");
   });
 });

@@ -11,7 +11,7 @@ import { durationSegment } from "./segments/duration";
 import { sessionSegment } from "./segments/session";
 import { activitySegment } from "./segments/activity";
 import { agentsSegment } from "./segments/agents";
-import { todosSegment } from "./segments/todos";
+import { breadcrumbSegment } from "./segments/breadcrumb";
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -19,7 +19,8 @@ export function buildHud(
   stdin: StdinData | null,
   transcript: TranscriptData,
   config: CockpitConfig,
-  now: number
+  now: number,
+  terminalWidth: number = 80,
 ): string {
   if (stdin === null) return "";
 
@@ -100,7 +101,7 @@ export function buildHud(
 
   // todos
   if (config.segments.todos.enabled) {
-    const seg = todosSegment(transcript.todos, config.colors.todos);
+    const seg = breadcrumbSegment(transcript.todos, config.colors.todos, terminalWidth);
     if (seg) line2.push(seg);
   }
 
@@ -121,7 +122,8 @@ async function main(): Promise<void> {
 
     const config = loadConfig();
     const transcript = await parseTranscript(stdin.transcript_path);
-    const output = buildHud(stdin, transcript, config, Date.now());
+    const termWidth = process.stdout.columns || 80;
+    const output = buildHud(stdin, transcript, config, Date.now(), termWidth);
 
     if (output) {
       process.stdout.write(output + "\n");

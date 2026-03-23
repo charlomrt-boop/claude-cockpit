@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { activitySegment } from "../../src/segments/activity";
 import { agentsSegment } from "../../src/segments/agents";
-import { todosSegment } from "../../src/segments/todos";
+import { breadcrumbSegment } from "../../src/segments/breadcrumb";
 import { COLORS } from "../../src/colors";
 import type { ToolEntry, AgentEntry, TodoEntry } from "../../src/types";
 
@@ -32,18 +32,18 @@ test("agentsSegment returns null for empty", () => {
   expect(agentsSegment([], COLORS.orange)).toBeNull();
 });
 
-test("todosSegment shows completion count", () => {
+test("breadcrumbSegment shows step progression", () => {
   const todos: TodoEntry[] = [
     { id: "1", subject: "A", status: "completed" },
     { id: "2", subject: "B", status: "in_progress" },
     { id: "3", subject: "C", status: "pending" },
   ];
-  const seg = todosSegment(todos, COLORS.green);
+  const seg = breadcrumbSegment(todos, COLORS.green, 120);
   expect(seg).not.toBeNull();
-  expect(seg!.text).toBe("TODO 1/3");
-  expect(seg!.icon).toBe("\u25B8");
+  expect(seg!.text).toBe("● A → ◐ B → ○ C");
+  expect(seg!.icon).toBeUndefined();
 });
 
-test("todosSegment returns null for empty", () => {
-  expect(todosSegment([], COLORS.green)).toBeNull();
+test("breadcrumbSegment returns null for empty", () => {
+  expect(breadcrumbSegment([], COLORS.green, 120)).toBeNull();
 });
