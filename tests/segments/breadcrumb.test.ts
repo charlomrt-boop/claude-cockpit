@@ -68,3 +68,39 @@ test("segment has correct fg/bg and no icon", () => {
   expect(seg!.bg).toBe(42);
   expect(seg!.icon).toBeUndefined();
 });
+
+test("truncates long subjects to fit budget", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Explorer le contexte projet", status: "completed" },
+    { id: "2", subject: "Planifier implementation", status: "in_progress" },
+    { id: "3", subject: "Implementer le code", status: "pending" },
+    { id: "4", subject: "Tester et valider", status: "pending" },
+  ];
+  // terminal 60 → budget 36, sep 9, avail 27, spacePerStep = floor(27/4)-2 = 4
+  const seg = breadcrumbSegment(todos, COLORS.green, 60);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).toContain("…");
+  expect(seg!.text).toContain("●");
+  expect(seg!.text).toContain("◐");
+  expect(seg!.text).toContain("○");
+});
+
+test("no truncation when terminal is wide enough", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "A", status: "completed" },
+    { id: "2", subject: "B", status: "in_progress" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 200);
+  expect(seg!.text).toBe("● A → ◐ B");
+});
+
+test("handles single-char truncation at minimum space", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Alpha", status: "completed" },
+    { id: "2", subject: "Beta", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 20);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).toContain("●");
+  expect(seg!.text).toContain("○");
+});
