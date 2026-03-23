@@ -1,0 +1,6 @@
+{"type":"assistant","timestamp":"2026-03-23T10:00:00Z","message":{"content":[{"type":"tool_use","id":"tool_1","name":"Read","input":{"file_path":"test.ts"}}]}}
+{"type":"tool_result","tool_use_id":"tool_1","content":"file contents here"}
+{"type":"assistant","timestamp":"2026-03-23T10:01:00Z","message":{"content":[{"type":"tool_use","id":"tool_2","name":"Edit","input":{"file_path":"test.ts"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"agent_1","name":"Task","input":{"description":"Find code","model":"haiku"}}]}}
+{"type":"tool_result","tool_use_id":"agent_1","content":"found it"}
+{"type":"custom-title","title":"fix-auth-bug"}
