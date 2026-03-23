@@ -1,0 +1,126 @@
+import type { StdinData, TranscriptData, CockpitConfig, Segment } from "./types";
+import { readStdin, parseStdin, getModelTier, getModelLabel, getContextPercent } from "./stdin";
+import { loadConfig } from "./config";
+import { parseTranscript } from "./transcript";
+import { renderHud } from "./renderer";
+import { modelSegment } from "./segments/model";
+import { contextSegment } from "./segments/context";
+import { usageSegment } from "./segments/usage";
+import { costSegment } from "./segments/cost";
+import { durationSegment } from "./segments/duration";
+import { sessionSegment } from "./segments/session";
+import { activitySegment } from "./segments/activity";
+import { agentsSegment } from "./segments/agents";
+import { todosSegment } from "./segments/todos";
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export function buildHud(
+  stdin: StdinData | null,
+  transcript: TranscriptData,
+  config: CockpitConfig,
+  now: number
+): string {
+  if (stdin === null) return "";
+
+  const tier = getModelTier(stdin.model.id);
+  const label = getModelLabel(stdin.model.display_name, stdin.model.id);
+  const contextPct = Math.round(getContextPercent(stdin));
+
+  // ── Line 1 ──────────────────────────────────────────────────────────────────
+  const line1: Segment[] = [];
+
+  // model — always enabled
+  line1.push(modelSegment(label, config.colors.model));
+
+  // context — always enabled
+  line1.push(contextSegment(contextPct, config.colors.context));
+
+  // usage (rate limits)
+  if (config.segments.usage.enabled) {
+    const fiveHourPct = stdin.rate_limits?.five_hour?.used_percentage ?? null;
+    const sevenDayPct = stdin.rate_limits?.seven_day?.used_percentage ?? null;
+    const seg = usageSegment(
+      fiveHourPct,
+      sevenDayPct,
+      config.segments.usage.showSevenDay,
+      config.colors.usage
+    );
+    if (seg) line1.push(seg);
+  }
+
+  // cost
+  if (config.segments.cost.enabled) {
+    const tokens = {
+      input: stdin.context_window.current_usage.input_tokens,
+      output: stdin.context_window.current_usage.output_tokens,
+      cacheRead: stdin.context_window.current_usage.cache_read_tokens,
+      cacheWrite: stdin.context_window.current_usage.cache_creation_tokens,
+    };
+    line1.push(costSegment(tokens, tier, config.cost.prices, config.colors.cost));
+  }
+
+  // duration
+  if (config.segments.duration.enabled) {
+    const seg = durationSegment(transcript.sessionStart, now, config.colors.duration);
+    if (seg) line1.push(seg);
+  }
+
+  // session name
+  if (config.segments.session.enabled) {
+    const seg = sessionSegment(transcript.sessionName, config.colors.session);
+    if (seg) line1.push(seg);
+  }
+
+  // ── Line 2 ──────────────────────────────────────────────────────────────────
+  const line2: Segment[] = [];
+
+  // activity (tools)
+  if (config.segments.activity.enabled) {
+    const recentTools = transcript.tools.slice(-config.segments.activity.maxTools);
+    const seg = activitySegment(recentTools, config.colors.activity);
+    if (seg) line2.push(seg);
+  }
+
+  // agents
+  if (config.segments.agents.enabled) {
+    const seg = agentsSegment(transcript.agents, config.colors.agents);
+    if (seg) line2.push(seg);
+  }
+
+  // todos
+  if (config.segments.todos.enabled) {
+    const seg = todosSegment(transcript.todos, config.colors.todos);
+    if (seg) line2.push(seg);
+  }
+
+  return renderHud(line1, line2, config.powerlineGlyphs, config.layout);
+}
+
+// ─── CLI entry point ──────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+  try {
+    const raw = await readStdin();
+    const stdin = parseStdin(raw);
+
+    if (!stdin) {
+      process.stdout.write("[claude-cockpit] Initializing...\n");
+      return;
+    }
+
+    const config = loadConfig();
+    const transcript = await parseTranscript(stdin.transcript_path);
+    const output = buildHud(stdin, transcript, config, Date.now());
+
+    if (output) {
+      process.stdout.write(output + "\n");
+    }
+  } catch (err) {
+    process.stderr.write(
+      `[claude-cockpit] error: ${err instanceof Error ? err.message : String(err)}\n`
+    );
+  }
+}
+
+main();
