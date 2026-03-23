@@ -51,6 +51,14 @@ test("empty subject falls back to id", () => {
   expect(seg!.text).toBe("○ abc");
 });
 
+test("whitespace-only subject falls back to id", () => {
+  const todos: TodoEntry[] = [
+    { id: "xyz", subject: "   ", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 120);
+  expect(seg!.text).toBe("○ xyz");
+});
+
 test("segment has correct fg/bg and no icon", () => {
   const todos: TodoEntry[] = [
     { id: "1", subject: "X", status: "pending" },
