@@ -55,8 +55,8 @@ function collapseCompleted(
     if (todos[i].status === "completed") completedIndices.push(i);
   }
 
-  // Try collapsing N..1 completed steps (most aggressive first)
-  for (let n = completedIndices.length; n >= 1; n--) {
+  // Try collapsing 1..N completed steps (minimal collapse first)
+  for (let n = 1; n <= completedIndices.length; n++) {
     const collapsedLabel = `✓×${n}`;
     const remaining = todos.filter((_, i) => !completedIndices.slice(0, n).includes(i));
     const itemCount = 1 + remaining.length;

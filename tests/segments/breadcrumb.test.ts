@@ -135,7 +135,7 @@ test("hard truncation when even full collapse isn't enough", () => {
   expect(seg!.text.length).toBeGreaterThan(0);
 });
 
-test("all completed at narrow terminal collapses to checkmark", () => {
+test("all completed at narrow terminal uses minimal collapse", () => {
   const todos: TodoEntry[] = [
     { id: "1", subject: "Step A", status: "completed" },
     { id: "2", subject: "Step B", status: "completed" },
@@ -143,9 +143,23 @@ test("all completed at narrow terminal collapses to checkmark", () => {
     { id: "4", subject: "Step D", status: "completed" },
     { id: "5", subject: "Step E", status: "completed" },
   ];
+  // width 20, budget 12: n=4 fits with 1 remaining step shown
   const seg = breadcrumbSegment(todos, COLORS.green, 20);
   expect(seg).not.toBeNull();
-  expect(seg!.text).toBe("✓×5");
+  expect(seg!.text).toContain("✓×");
+  expect(seg!.text).toContain("●"); // at least 1 step still shown
+});
+
+test("all completed at extremely narrow terminal collapses fully", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Step A", status: "completed" },
+    { id: "2", subject: "Step B", status: "completed" },
+    { id: "3", subject: "Step C", status: "completed" },
+  ];
+  // width 8, budget 4: nothing fits except full collapse
+  const seg = breadcrumbSegment(todos, COLORS.green, 8);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).toBe("✓×3");
 });
 
 test("all completed, no collapse needed at wide terminal", () => {
@@ -157,6 +171,23 @@ test("all completed, no collapse needed at wide terminal", () => {
   const seg = breadcrumbSegment(todos, COLORS.green, 120);
   expect(seg!.text).toBe("● A → ● B → ● C");
   expect(seg!.text).not.toContain("✓×");
+});
+
+test("collapses minimal N completed steps (stops at first fit)", () => {
+  // 3 completed + 1 active + 1 pending, width 50
+  // budget = 30. With n=1: ✓×1(3) + sep(3) + 3 items * (icon+space+subject+sep)
+  // Should collapse minimally, NOT collapse all 3
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "A", status: "completed" },
+    { id: "2", subject: "B", status: "completed" },
+    { id: "3", subject: "C", status: "completed" },
+    { id: "4", subject: "Active", status: "in_progress" },
+    { id: "5", subject: "Next", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 50);
+  expect(seg).not.toBeNull();
+  // Should NOT over-collapse to ✓×3 if fewer suffices
+  expect(seg!.text).not.toContain("✓×3");
 });
 
 test("only pending steps, no completed to collapse", () => {
