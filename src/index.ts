@@ -40,26 +40,32 @@ export function buildHud(
   // context — always enabled
   line1.push(contextSegment(contextPct, config.colors.context));
 
-  // usage (rate limits)
+  // usage (rate limits + time remaining)
   if (config.segments.usage.enabled) {
     const fiveHourPct = stdin.rate_limits?.five_hour?.used_percentage ?? null;
+    const fiveHourResets = stdin.rate_limits?.five_hour?.resets_at ?? null;
     const sevenDayPct = stdin.rate_limits?.seven_day?.used_percentage ?? null;
+    const sevenDayResets = stdin.rate_limits?.seven_day?.resets_at ?? null;
     const seg = usageSegment(
       fiveHourPct,
+      fiveHourResets,
       sevenDayPct,
+      sevenDayResets,
       config.segments.usage.showSevenDay,
-      config.colors.usage
+      config.colors.usage,
+      now
     );
     if (seg) line1.push(seg);
   }
 
   // cost
   if (config.segments.cost.enabled) {
+    const usage = stdin.context_window.current_usage;
     const tokens = {
-      input: stdin.context_window.current_usage.input_tokens,
-      output: stdin.context_window.current_usage.output_tokens,
-      cacheRead: stdin.context_window.current_usage.cache_read_tokens,
-      cacheWrite: stdin.context_window.current_usage.cache_creation_tokens,
+      input: usage.input_tokens ?? 0,
+      output: usage.output_tokens ?? 0,
+      cacheRead: usage.cache_read_tokens ?? 0,
+      cacheWrite: usage.cache_creation_tokens ?? 0,
     };
     line1.push(costSegment(tokens, tier, config.cost.prices, config.colors.cost));
   }

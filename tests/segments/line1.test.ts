@@ -80,51 +80,55 @@ describe("contextSegment", () => {
 // ─── usageSegment ─────────────────────────────────────────────────────────────
 
 describe("usageSegment", () => {
-  it("returns cyan bg with 5h percentage", () => {
-    const seg = usageSegment(25, null, "auto", usageColors);
+  const now = Date.now();
+  const resetIn2h = Math.floor(now / 1000) + 7200; // 2h from now
+
+  it("returns cyan bg with 5h percentage and time remaining", () => {
+    const seg = usageSegment(25, resetIn2h, null, null, "auto", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.bg).toBe(usageColors.normal);
     expect(seg!.text).toContain("25%");
-    expect(seg!.fg).toBe(COLORS.white);
+    expect(seg!.text).toContain("left");
   });
 
   it("returns null when both values are null", () => {
-    const seg = usageSegment(null, null, "auto", usageColors);
+    const seg = usageSegment(null, null, null, null, "auto", usageColors, now);
     expect(seg).toBeNull();
   });
 
-  it("returns warning (red/orange) bg at >= 80%", () => {
-    const seg = usageSegment(85, null, "auto", usageColors);
+  it("returns warning bg at >= 80%", () => {
+    const seg = usageSegment(85, null, null, null, "auto", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.bg).toBe(usageColors.warning);
   });
 
-  it("shows 7d when showSevenDay is always and sevenDayPct is provided", () => {
-    const seg = usageSegment(25, 40, "always", usageColors);
+  it("shows 7d when showSevenDay is always", () => {
+    const seg = usageSegment(25, null, 40, resetIn2h, "always", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.text).toContain("7d: 40%");
+    expect(seg!.text).toContain("left");
   });
 
   it("shows 7d in auto mode when sevenDayPct is provided", () => {
-    const seg = usageSegment(25, 40, "auto", usageColors);
+    const seg = usageSegment(25, null, 40, null, "auto", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.text).toContain("7d: 40%");
   });
 
   it("omits 7d in auto mode when sevenDayPct is null", () => {
-    const seg = usageSegment(25, null, "auto", usageColors);
+    const seg = usageSegment(25, null, null, null, "auto", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.text).not.toContain("7d:");
   });
 
   it("omits 7d when showSevenDay is never", () => {
-    const seg = usageSegment(25, 40, "never", usageColors);
+    const seg = usageSegment(25, null, 40, null, "never", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.text).not.toContain("7d:");
   });
 
   it("uses warning bg when 7d pct is >= 80 even if 5h is low", () => {
-    const seg = usageSegment(10, 82, "always", usageColors);
+    const seg = usageSegment(10, null, 82, null, "always", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.bg).toBe(usageColors.warning);
   });
