@@ -55,6 +55,7 @@ export function parseTranscriptLines(lines: string[]): TranscriptData {
   const toolMap = new Map<string, ToolEntry>();
   const agentMap = new Map<string, AgentEntry>();
   let todos: TodoEntry[] = [];
+  const taskCreateIds = new Set<string>(); // block.ids of TaskCreate calls
   let sessionStart: number | null = null;
   let sessionName: string | null = null;
 
@@ -110,8 +111,10 @@ export function parseTranscriptLines(lines: string[]): TranscriptData {
           }
         } else if (block.name === "TaskCreate") {
           const input = block.input as { id?: string; subject?: string; description?: string };
+          // Store with block.id as temporary key; tool_result will patch the real ID
+          taskCreateIds.add(block.id);
           todos.push({
-            id: String(input.id ?? block.id),
+            id: block.id,
             subject: String(input.subject ?? input.description ?? block.id),
             status: "pending",
           });
@@ -137,7 +140,15 @@ export function parseTranscriptLines(lines: string[]): TranscriptData {
       const line = entry as RawToolResultLine;
       const id = line.tool_use_id;
 
-      if (toolMap.has(id)) {
+      if (taskCreateIds.has(id)) {
+        // Extract real task ID from result like "Task #14 created successfully: ..."
+        const match = String(line.content).match(/Task #(\d+)/);
+        if (match) {
+          const todo = todos.find((t) => t.id === id);
+          if (todo) todo.id = match[1];
+        }
+        taskCreateIds.delete(id);
+      } else if (toolMap.has(id)) {
         toolMap.get(id)!.status = line.is_error ? "error" : "completed";
       } else if (agentMap.has(id)) {
         agentMap.get(id)!.status = line.is_error ? "error" : "completed";
