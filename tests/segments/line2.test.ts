@@ -40,7 +40,7 @@ test("todosSegment shows completion count", () => {
   ];
   const seg = todosSegment(todos, COLORS.green);
   expect(seg).not.toBeNull();
-  expect(seg!.text).toBe("1/3");
+  expect(seg!.text).toBe("TODO 1/3");
   expect(seg!.icon).toBe("\u25B8");
 });
 

@@ -12,7 +12,7 @@ export function usageSegment(
   const parts: string[] = [];
 
   if (fiveHourPct !== null) {
-    parts.push(`5h: ${fiveHourPct}%`);
+    parts.push(`USAGE 5h: ${fiveHourPct}%`);
   }
 
   const includeSevenDay =

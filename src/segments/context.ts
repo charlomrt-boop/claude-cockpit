@@ -22,7 +22,7 @@ export function contextSegment(
   const empty = BAR_WIDTH - filled;
   const bar = FILLED.repeat(filled) + EMPTY.repeat(empty);
 
-  const text = `${bar} ${percent}%`;
+  const text = `CTX ${bar} ${percent}%`;
 
   return {
     text,

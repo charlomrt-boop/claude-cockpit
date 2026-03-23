@@ -139,26 +139,25 @@ describe("costSegment", () => {
   it("calculates cost for opus tier", () => {
     const seg = costSegment(tokens, "opus", prices, bgMagenta);
     // input: 100000 * 15 / 1M = 1.50, output: 5000 * 75 / 1M = 0.375 → ~$1.88
-    expect(seg.text).toMatch(/~\$\d+\.\d{2}$/);
+    expect(seg.text).toMatch(/COST ~\$\d+\.\d{2}$/);
     expect(seg.text).not.toContain("?");
     expect(seg.fg).toBe(COLORS.white);
     expect(seg.bg).toBe(bgMagenta);
   });
 
-  it("shows '~$?.??' when tier is null", () => {
+  it("shows 'COST ~$?.??' when tier is null", () => {
     const seg = costSegment(tokens, null, prices, bgMagenta);
-    expect(seg.text).toBe("~$?.??");
+    expect(seg.text).toBe("COST ~$?.??");
   });
 
   it("calculates cost for sonnet tier", () => {
     const seg = costSegment(tokens, "sonnet", prices, bgMagenta);
-    // input: 100000 * 3 / 1M = 0.30, output: 5000 * 15 / 1M = 0.075 → ~$0.38
-    expect(seg.text).toMatch(/~\$\d+\.\d{2}$/);
+    expect(seg.text).toMatch(/COST ~\$\d+\.\d{2}$/);
   });
 
   it("calculates cost for haiku tier", () => {
     const seg = costSegment(tokens, "haiku", prices, bgMagenta);
-    expect(seg.text).toMatch(/~\$\d+\.\d{2}$/);
+    expect(seg.text).toMatch(/COST ~\$\d+\.\d{2}$/);
   });
 
   it("includes cache tokens in cost calculation", () => {
@@ -169,7 +168,7 @@ describe("costSegment", () => {
       cacheWrite: 5_000,
     };
     const seg = costSegment(tokensWithCache, "opus", prices, bgMagenta);
-    expect(seg.text).toMatch(/~\$\d+\.\d{2}$/);
+    expect(seg.text).toMatch(/COST ~\$\d+\.\d{2}$/);
   });
 });
 
@@ -183,7 +182,7 @@ describe("durationSegment", () => {
     const start = now - 5 * 60_000;
     const seg = durationSegment(start, now, bgGray);
     expect(seg).not.toBeNull();
-    expect(seg!.text).toBe("5m");
+    expect(seg!.text).toBe("TIME 5m");
     expect(seg!.fg).toBe(COLORS.white);
     expect(seg!.bg).toBe(bgGray);
   });
@@ -192,14 +191,14 @@ describe("durationSegment", () => {
     const start = now - 75 * 60_000;
     const seg = durationSegment(start, now, bgGray);
     expect(seg).not.toBeNull();
-    expect(seg!.text).toBe("1h15");
+    expect(seg!.text).toBe("TIME 1h15");
   });
 
   it("zero-pads minutes below 10 in hour format", () => {
     const start = now - 65 * 60_000;
     const seg = durationSegment(start, now, bgGray);
     expect(seg).not.toBeNull();
-    expect(seg!.text).toBe("1h05");
+    expect(seg!.text).toBe("TIME 1h05");
   });
 
   it("returns null when sessionStartMs is null", () => {
@@ -210,7 +209,7 @@ describe("durationSegment", () => {
   it("shows 0m for a brand-new session", () => {
     const seg = durationSegment(now, now, bgGray);
     expect(seg).not.toBeNull();
-    expect(seg!.text).toBe("0m");
+    expect(seg!.text).toBe("TIME 0m");
   });
 });
 

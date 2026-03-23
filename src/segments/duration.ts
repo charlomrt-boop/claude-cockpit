@@ -14,10 +14,10 @@ export function durationSegment(
 
   let text: string;
   if (hours === 0) {
-    text = `${totalMinutes}m`;
+    text = `TIME ${totalMinutes}m`;
   } else {
     const paddedMinutes = String(minutes).padStart(2, "0");
-    text = `${hours}h${paddedMinutes}`;
+    text = `TIME ${hours}h${paddedMinutes}`;
   }
 
   return {

@@ -8,7 +8,7 @@ export function todosSegment(todos: TodoEntry[], bgColor: number): Segment | nul
   const total = todos.length;
 
   return {
-    text: `${completed}/${total}`,
+    text: `TODO ${completed}/${total}`,
     fg: COLORS.white,
     bg: bgColor,
     icon: "\u25B8", // ▸

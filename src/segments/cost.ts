@@ -18,7 +18,7 @@ export function costSegment(
   let costText: string;
 
   if (tier === null) {
-    costText = "~$?.??";
+    costText = "COST ~$?.??";
   } else {
     const p = prices[tier];
     const cost =
@@ -28,7 +28,7 @@ export function costSegment(
         tokens.cacheWrite * p.cacheWrite) /
       1_000_000;
 
-    costText = `~$${cost.toFixed(2)}`;
+    costText = `COST ~$${cost.toFixed(2)}`;
   }
 
   return {
