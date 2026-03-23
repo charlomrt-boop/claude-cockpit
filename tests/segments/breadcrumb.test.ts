@@ -104,3 +104,69 @@ test("handles single-char truncation at minimum space", () => {
   expect(seg!.text).toContain("●");
   expect(seg!.text).toContain("○");
 });
+
+test("collapses completed steps when too many steps for width", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Step one", status: "completed" },
+    { id: "2", subject: "Step two", status: "completed" },
+    { id: "3", subject: "Step three", status: "completed" },
+    { id: "4", subject: "Active step", status: "in_progress" },
+    { id: "5", subject: "Next step", status: "pending" },
+    { id: "6", subject: "Final step", status: "pending" },
+    { id: "7", subject: "Last one", status: "pending" },
+    { id: "8", subject: "Very last", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 40);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).toContain("✓×");
+  expect(seg!.text).toContain("◐");
+});
+
+test("hard truncation when even full collapse isn't enough", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Done", status: "completed" },
+    { id: "2", subject: "Active", status: "in_progress" },
+    { id: "3", subject: "Pend1", status: "pending" },
+    { id: "4", subject: "Pend2", status: "pending" },
+    { id: "5", subject: "Pend3", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 15);
+  expect(seg).not.toBeNull();
+  expect(seg!.text.length).toBeGreaterThan(0);
+});
+
+test("all completed at narrow terminal collapses to checkmark", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "Step A", status: "completed" },
+    { id: "2", subject: "Step B", status: "completed" },
+    { id: "3", subject: "Step C", status: "completed" },
+    { id: "4", subject: "Step D", status: "completed" },
+    { id: "5", subject: "Step E", status: "completed" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 20);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).toBe("✓×5");
+});
+
+test("all completed, no collapse needed at wide terminal", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "A", status: "completed" },
+    { id: "2", subject: "B", status: "completed" },
+    { id: "3", subject: "C", status: "completed" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 120);
+  expect(seg!.text).toBe("● A → ● B → ● C");
+  expect(seg!.text).not.toContain("✓×");
+});
+
+test("only pending steps, no completed to collapse", () => {
+  const todos: TodoEntry[] = [
+    { id: "1", subject: "LongPendingName", status: "pending" },
+    { id: "2", subject: "AnotherLongOne", status: "pending" },
+    { id: "3", subject: "YetAnotherStep", status: "pending" },
+  ];
+  const seg = breadcrumbSegment(todos, COLORS.green, 30);
+  expect(seg).not.toBeNull();
+  expect(seg!.text).not.toContain("✓×");
+  expect(seg!.text).toContain("○");
+});
