@@ -70,6 +70,7 @@ export interface CockpitConfig {
     // model and context are always on (not configurable)
     usage: { enabled: boolean; showSevenDay: "auto" | "always" | "never" };
     cost: { enabled: boolean };
+    burnRate: { enabled: boolean; minMinutes: number };
     activity: { enabled: boolean; maxTools: number };
     agents: { enabled: boolean };
     todos: { enabled: boolean };
@@ -81,6 +82,7 @@ export interface CockpitConfig {
     context: { low: number; mid: number; high: number };
     usage: { normal: number; warning: number };
     cost: number;
+    burnRate: { low: number; mid: number; high: number };
     activity: number;
     agents: number;
     todos: number;

@@ -7,6 +7,7 @@ import { modelSegment } from "./segments/model";
 import { contextSegment } from "./segments/context";
 import { usageSegment } from "./segments/usage";
 import { costSegment } from "./segments/cost";
+import { burnRateSegment } from "./segments/burnRate";
 import { durationSegment } from "./segments/duration";
 import { sessionSegment } from "./segments/session";
 import { activitySegment } from "./segments/activity";
@@ -69,6 +70,32 @@ export function buildHud(
       cacheWrite: usage.cache_creation_tokens ?? 0,
     };
     line1.push(costSegment(tokens, tier, config.cost.prices, config.colors.cost));
+  }
+
+  // burn rate (after cost, needs cost value + session start)
+  if (config.segments.burnRate.enabled && config.segments.cost.enabled) {
+    const usage = stdin.context_window.current_usage;
+    const tokens = {
+      input: usage.input_tokens ?? 0,
+      output: usage.output_tokens ?? 0,
+      cacheRead: usage.cache_read_tokens ?? 0,
+      cacheWrite: usage.cache_creation_tokens ?? 0,
+    };
+    const prices = config.cost.prices[tier];
+    const costValue =
+      (tokens.input * prices.input +
+        tokens.output * prices.output +
+        tokens.cacheRead * prices.cacheRead +
+        tokens.cacheWrite * prices.cacheWrite) /
+      1_000_000;
+    const seg = burnRateSegment(
+      costValue,
+      transcript.sessionStart,
+      now,
+      config.colors.burnRate,
+      config.segments.burnRate.minMinutes,
+    );
+    if (seg) line1.push(seg);
   }
 
   // duration

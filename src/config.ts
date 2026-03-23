@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: CockpitConfig = {
   segments: {
     usage: { enabled: true, showSevenDay: "auto" },
     cost: { enabled: true },
+    burnRate: { enabled: true, minMinutes: 2 },
     activity: { enabled: true, maxTools: 5 },
     agents: { enabled: true },
     todos: { enabled: true },
@@ -24,6 +25,7 @@ export const DEFAULT_CONFIG: CockpitConfig = {
     context: { low: COLORS.green, mid: COLORS.yellow, high: COLORS.red },
     usage: { normal: COLORS.cyan, warning: COLORS.orange },
     cost: COLORS.magenta,
+    burnRate: { low: COLORS.green, mid: COLORS.yellow, high: COLORS.red },
     activity: COLORS.teal,
     agents: COLORS.blue,
     todos: COLORS.yellow,
@@ -70,6 +72,18 @@ function mergeSegments(
     const c = raw.cost;
     result.cost = {
       enabled: typeof c.enabled === "boolean" ? c.enabled : defaults.cost.enabled,
+    };
+  }
+
+  // burnRate
+  if (isObj(raw.burnRate)) {
+    const br = raw.burnRate;
+    result.burnRate = {
+      enabled: typeof br.enabled === "boolean" ? br.enabled : defaults.burnRate.enabled,
+      minMinutes:
+        typeof br.minMinutes === "number" && br.minMinutes >= 0
+          ? br.minMinutes
+          : defaults.burnRate.minMinutes,
     };
   }
 
@@ -149,6 +163,15 @@ function mergeColors(
   }
 
   if (typeof raw.cost === "number") result.cost = num(raw.cost, defaults.cost);
+
+  if (isObj(raw.burnRate)) {
+    result.burnRate = {
+      low: num(raw.burnRate.low, defaults.burnRate.low),
+      mid: num(raw.burnRate.mid, defaults.burnRate.mid),
+      high: num(raw.burnRate.high, defaults.burnRate.high),
+    };
+  }
+
   if (typeof raw.activity === "number") result.activity = num(raw.activity, defaults.activity);
   if (typeof raw.agents === "number") result.agents = num(raw.agents, defaults.agents);
   if (typeof raw.todos === "number") result.todos = num(raw.todos, defaults.todos);
