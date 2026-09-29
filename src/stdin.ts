@@ -19,6 +19,7 @@ export async function readStdin(): Promise<string> {
 
 export function getModelTier(modelId: string): ModelTier | null {
   const id = modelId.toLowerCase();
+  if (id.includes("fable")) return "fable";
   if (id.includes("opus")) return "opus";
   if (id.includes("sonnet")) return "sonnet";
   if (id.includes("haiku")) return "haiku";
@@ -26,7 +27,7 @@ export function getModelTier(modelId: string): ModelTier | null {
 }
 
 export function getModelLabel(displayName: string, modelId: string): string {
-  const match = displayName.match(/(Opus|Sonnet|Haiku)\s*[\d.]+/i);
+  const match = displayName.match(/(Fable|Opus|Sonnet|Haiku)\s*[\d.]+/i);
   if (match) return match[0];
   const tier = getModelTier(modelId);
   if (tier) return tier.charAt(0).toUpperCase() + tier.slice(1);

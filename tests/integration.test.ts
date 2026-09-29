@@ -115,4 +115,27 @@ describe("buildHud", () => {
     const result = buildHud(mockStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
     expect(result).toContain("\n");
   });
+
+  test("renders full HUD with a real cost for Fable 5", () => {
+    const fableStdin: StdinData = {
+      ...mockStdin,
+      model: { id: "claude-fable-5", display_name: "Fable 5" },
+    };
+    const result = buildHud(fableStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toContain("[Fable 5]");
+    expect(result).toContain("COST ~$");
+    expect(result).not.toContain("$?.??");
+  });
+
+  test("does not crash on unknown model tier (burn rate skipped, cost unknown)", () => {
+    const unknownStdin: StdinData = {
+      ...mockStdin,
+      model: { id: "gpt-5-turbo", display_name: "GPT-5 Turbo" },
+    };
+    const result = buildHud(unknownStdin, mockTranscript, DEFAULT_CONFIG, mockNow, 120);
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toContain("COST ~$?.??");
+    expect(result).not.toContain("/h");
+  });
 });

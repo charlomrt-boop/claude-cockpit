@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG: CockpitConfig = {
   powerlineGlyphs: false,
   segments: {
     usage: { enabled: true, showSevenDay: "auto" },
+    pace: { enabled: true },
     cost: { enabled: true },
     burnRate: { enabled: true, minMinutes: 2 },
     activity: { enabled: true, maxTools: 5 },
@@ -24,6 +25,7 @@ export const DEFAULT_CONFIG: CockpitConfig = {
     model: COLORS.blue,
     context: { low: COLORS.green, mid: COLORS.yellow, high: COLORS.red },
     usage: { normal: COLORS.cyan, warning: COLORS.orange },
+    pace: { low: COLORS.green, mid: COLORS.yellow, high: COLORS.red },
     cost: COLORS.magenta,
     burnRate: { low: COLORS.green, mid: COLORS.yellow, high: COLORS.red },
     activity: COLORS.teal,
@@ -33,10 +35,12 @@ export const DEFAULT_CONFIG: CockpitConfig = {
     session: COLORS.darkGray,
   },
   cost: {
+    // $/MTok — cacheRead = 0.1x input, cacheWrite = 1.25x input (TTL 5m)
     prices: {
-      opus: { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 },
+      fable: { input: 10, output: 50, cacheRead: 1, cacheWrite: 12.5 },
+      opus: { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
       sonnet: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
-      haiku: { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 },
+      haiku: { input: 1, output: 5, cacheRead: 0.1, cacheWrite: 1.25 },
     },
   },
 };
@@ -64,6 +68,14 @@ function mergeSegments(
         u.showSevenDay === "auto" || u.showSevenDay === "always" || u.showSevenDay === "never"
           ? u.showSevenDay
           : defaults.usage.showSevenDay,
+    };
+  }
+
+  // pace
+  if (isObj(raw.pace)) {
+    const p = raw.pace;
+    result.pace = {
+      enabled: typeof p.enabled === "boolean" ? p.enabled : defaults.pace.enabled,
     };
   }
 
@@ -162,6 +174,14 @@ function mergeColors(
     };
   }
 
+  if (isObj(raw.pace)) {
+    result.pace = {
+      low: num(raw.pace.low, defaults.pace.low),
+      mid: num(raw.pace.mid, defaults.pace.mid),
+      high: num(raw.pace.high, defaults.pace.high),
+    };
+  }
+
   if (typeof raw.cost === "number") result.cost = num(raw.cost, defaults.cost);
 
   if (isObj(raw.burnRate)) {
@@ -188,7 +208,7 @@ function mergeCost(
   if (!isObj(raw) || !isObj(raw.prices)) return defaults;
 
   const prices = { ...defaults.prices };
-  const tiers = ["opus", "sonnet", "haiku"] as const;
+  const tiers = ["fable", "opus", "sonnet", "haiku"] as const;
 
   for (const tier of tiers) {
     const t = raw.prices[tier];

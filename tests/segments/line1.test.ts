@@ -4,6 +4,7 @@ import { DEFAULT_CONFIG } from "../../src/config";
 import { modelSegment } from "../../src/segments/model";
 import { contextSegment } from "../../src/segments/context";
 import { usageSegment } from "../../src/segments/usage";
+import { paceSegment } from "../../src/segments/pace";
 import { costSegment } from "../../src/segments/cost";
 import { durationSegment } from "../../src/segments/duration";
 import { sessionSegment } from "../../src/segments/session";
@@ -131,6 +132,65 @@ describe("usageSegment", () => {
     const seg = usageSegment(10, null, 82, null, "always", usageColors, now);
     expect(seg).not.toBeNull();
     expect(seg!.bg).toBe(usageColors.warning);
+  });
+});
+
+// ─── paceSegment ─────────────────────────────────────────────────────────────
+
+describe("paceSegment", () => {
+  const now = Date.now();
+  const paceColors = DEFAULT_CONFIG.colors.pace;
+
+  // Helper: resets_at for a given number of days left in the 7-day window
+  const resetInDays = (days: number) => Math.floor(now / 1000) + days * 86400;
+
+  it("returns null when sevenDayPct is null", () => {
+    const seg = paceSegment(null, resetInDays(3), paceColors, now);
+    expect(seg).toBeNull();
+  });
+
+  it("returns null when resets_at is null", () => {
+    const seg = paceSegment(30, null, paceColors, now);
+    expect(seg).toBeNull();
+  });
+
+  it("returns null when less than ~1 hour elapsed", () => {
+    // 6.99 days left → only 0.01 days elapsed
+    const seg = paceSegment(1, resetInDays(6.99), paceColors, now);
+    expect(seg).toBeNull();
+  });
+
+  it("shows green when under daily budget", () => {
+    // 3 days left → 4 days elapsed, 40% used → 10%/day, budget ~14.3%/day → pace ~70%
+    const seg = paceSegment(40, resetInDays(3), paceColors, now);
+    expect(seg).not.toBeNull();
+    expect(seg!.bg).toBe(paceColors.low);
+    expect(seg!.text).toMatch(/^PACE \d+%$/);
+    // 40/4 = 10, 10/14.286 * 100 = 70
+    expect(seg!.text).toBe("PACE 70%");
+  });
+
+  it("shows yellow when slightly over budget (100-130%)", () => {
+    // 3 days left → 4 days elapsed, 70% used → 17.5%/day, budget 14.3 → pace ~122%
+    const seg = paceSegment(70, resetInDays(3), paceColors, now);
+    expect(seg).not.toBeNull();
+    expect(seg!.bg).toBe(paceColors.mid);
+  });
+
+  it("shows red when significantly over budget (>130%)", () => {
+    // 5 days left → 2 days elapsed, 60% used → 30%/day, budget 14.3 → pace ~210%
+    const seg = paceSegment(60, resetInDays(5), paceColors, now);
+    expect(seg).not.toBeNull();
+    expect(seg!.bg).toBe(paceColors.high);
+  });
+
+  it("shows exactly 100% at perfect pace", () => {
+    // 3 days left → 4 days elapsed, 4 * (100/7) ≈ 57.14% used → pace 100%
+    const pct = (4 * 100) / 7;
+    const seg = paceSegment(pct, resetInDays(3), paceColors, now);
+    expect(seg).not.toBeNull();
+    expect(seg!.text).toBe("PACE 100%");
+    expect(seg!.bg).toBe(paceColors.low);
   });
 });
 

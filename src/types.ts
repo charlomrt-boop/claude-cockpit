@@ -30,7 +30,7 @@ export interface Segment {
 }
 
 // === Model tier for cost lookup ===
-export type ModelTier = "opus" | "sonnet" | "haiku";
+export type ModelTier = "fable" | "opus" | "sonnet" | "haiku";
 
 // === Transcript parsed data ===
 export interface ToolEntry {
@@ -69,6 +69,7 @@ export interface CockpitConfig {
   segments: {
     // model and context are always on (not configurable)
     usage: { enabled: boolean; showSevenDay: "auto" | "always" | "never" };
+    pace: { enabled: boolean };
     cost: { enabled: boolean };
     burnRate: { enabled: boolean; minMinutes: number };
     activity: { enabled: boolean; maxTools: number };
@@ -81,6 +82,7 @@ export interface CockpitConfig {
     model: number;
     context: { low: number; mid: number; high: number };
     usage: { normal: number; warning: number };
+    pace: { low: number; mid: number; high: number };
     cost: number;
     burnRate: { low: number; mid: number; high: number };
     activity: number;

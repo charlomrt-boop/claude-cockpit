@@ -31,8 +31,13 @@ test("loadConfigFromString ignores invalid types", () => {
 });
 
 test("DEFAULT_CONFIG has correct cost prices for opus", () => {
-  expect(DEFAULT_CONFIG.cost.prices.opus.input).toBe(15);
-  expect(DEFAULT_CONFIG.cost.prices.opus.output).toBe(75);
+  expect(DEFAULT_CONFIG.cost.prices.opus.input).toBe(5);
+  expect(DEFAULT_CONFIG.cost.prices.opus.output).toBe(25);
+});
+
+test("DEFAULT_CONFIG has correct cost prices for fable", () => {
+  expect(DEFAULT_CONFIG.cost.prices.fable.input).toBe(10);
+  expect(DEFAULT_CONFIG.cost.prices.fable.output).toBe(50);
 });
 
 test("DEFAULT_CONFIG has theme field", () => {

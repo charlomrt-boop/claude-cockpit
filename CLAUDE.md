@@ -1,4 +1,4 @@
-# claude-cockpit
+# Claude-Code-Cockpit
 
 ## Stack
 - TypeScript 5.7, Bun runtime, zero dependencies

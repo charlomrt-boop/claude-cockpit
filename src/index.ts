@@ -6,6 +6,7 @@ import { renderHud } from "./renderer";
 import { modelSegment } from "./segments/model";
 import { contextSegment } from "./segments/context";
 import { usageSegment } from "./segments/usage";
+import { paceSegment } from "./segments/pace";
 import { costSegment } from "./segments/cost";
 import { burnRateSegment } from "./segments/burnRate";
 import { durationSegment } from "./segments/duration";
@@ -13,6 +14,7 @@ import { sessionSegment } from "./segments/session";
 import { activitySegment } from "./segments/activity";
 import { agentsSegment } from "./segments/agents";
 import { breadcrumbSegment } from "./segments/breadcrumb";
+import { writeUsage } from "./usageExport";
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -60,6 +62,14 @@ export function buildHud(
     if (seg) line1.push(seg);
   }
 
+  // pace (daily budget indicator from 7d data)
+  if (config.segments.pace.enabled) {
+    const sevenDayPct = stdin.rate_limits?.seven_day?.used_percentage ?? null;
+    const sevenDayResets = stdin.rate_limits?.seven_day?.resets_at ?? null;
+    const seg = paceSegment(sevenDayPct, sevenDayResets, config.colors.pace, now);
+    if (seg) line1.push(seg);
+  }
+
   // cost
   if (config.segments.cost.enabled) {
     const usage = stdin.context_window.current_usage;
@@ -73,7 +83,8 @@ export function buildHud(
   }
 
   // burn rate (after cost, needs cost value + session start)
-  if (config.segments.burnRate.enabled && config.segments.cost.enabled) {
+  // tier === null means no pricing available — skip, same degraded mode as costSegment's $?.??
+  if (config.segments.burnRate.enabled && config.segments.cost.enabled && tier !== null) {
     const usage = stdin.context_window.current_usage;
     const tokens = {
       input: usage.input_tokens ?? 0,
@@ -147,6 +158,7 @@ async function main(): Promise<void> {
       return;
     }
 
+    writeUsage(stdin, Date.now());
     const config = loadConfig();
     const transcript = await parseTranscript(stdin.transcript_path);
     const termWidth = process.stdout.columns || 80;

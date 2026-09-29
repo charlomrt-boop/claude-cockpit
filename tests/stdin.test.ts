@@ -52,6 +52,10 @@ test("getModelTier handles bedrock IDs", () => {
   expect(getModelTier("anthropic.claude-3-opus-20240229-v1:0")).toBe("opus");
 });
 
+test("getModelTier detects fable", () => {
+  expect(getModelTier("claude-fable-5")).toBe("fable");
+});
+
 test("getModelTier returns null for unknown model", () => {
   expect(getModelTier("gpt-4-turbo")).toBeNull();
 });
@@ -61,6 +65,11 @@ test("getModelLabel extracts short name", () => {
   expect(getModelLabel("Claude Sonnet 4.5 v2", "claude-sonnet-4-5")).toBe("Sonnet 4.5");
   expect(getModelLabel("", "claude-haiku-4-5")).toBe("Haiku");
   expect(getModelLabel("", "gpt-4")).toBe("Unknown");
+});
+
+test("getModelLabel handles fable", () => {
+  expect(getModelLabel("Fable 5", "claude-fable-5")).toBe("Fable 5");
+  expect(getModelLabel("", "claude-fable-5")).toBe("Fable");
 });
 
 test("getContextPercent prefers native used_percentage", () => {
